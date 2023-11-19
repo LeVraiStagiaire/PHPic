@@ -22,6 +22,18 @@ if (file_exists("config.php")) {
         fwrite($configFile, "?>");
         fclose($configFile);
 
+        $usersFile = fopen("config/users.php", "w");
+        fwrite($usersFile, "<?php\n");
+        fwrite($usersFile, "\n");
+        fwrite($usersFile, "$users = array(\n");
+        fwrite($usersFile, "    'admin' => '".password_hash($_POST['password'], PASSWORD_DEFAULT)."\n");
+        fwrite($usersFile, ");\n");
+        fwrite($usersFile, "\n");
+        fwrite($usersFile, "$users_roles = array(\n");
+        fwrite($usersFile, "    'admin' => 'administrators'\n");
+        fwrite($usersFile, ");\n");
+        fwrite($usersFile, "?>");
+
         echo "<script>alert('Installation terminée !');</script>";
     }
 }
@@ -46,23 +58,6 @@ if (file_exists("config.php")) {
                     <div class="mb-3">
                         <label for="passwordField" class="form-label">Mot de passe</label>
                         <input type="password" class="form-control" name="password" id="passwordField" placeholder="Mot de passe" required />
-                    </div>
-                    <h4>Configuration de la base de données</h4>
-                    <div class="mb-3">
-                        <label for="dbHostField" class="form-label">Hôte</label>
-                        <input type="text" class="form-control" name="dbHost" id="dbHostField" placeholder="Hôte" required />
-                    </div>
-                    <div class="mb-3">
-                        <label for="dbUserField" class="form-label">Utilisateur</label>
-                        <input type="text" class="form-control" name="dbUser" id="dbUserField" placeholder="Utilisateur" required />
-                    </div>
-                    <div class="mb-3">
-                        <label for="dbPasswordField" class="form-label">Mot de passe</label>
-                        <input type="password" class="form-control" name="dbPassword" id="dbPasswordField" placeholder="Mot de passe" required />
-                    </div>
-                    <div class="mb-3">
-                        <label for="dbNameField" class="form-label">Nom de la base de données</label>
-                        <input type="text" class="form-control" name="dbName" id="dbNameField" placeholder="Nom de la base de données" required />
                     </div>
                     <div class="d-grid gap-2">
                         <button type="submit" class="btn btn-primary btn-block btn-lg">Installer</button>
