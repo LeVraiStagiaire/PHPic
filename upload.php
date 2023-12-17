@@ -80,32 +80,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <button type="submit" class="btn btn-primary">Envoyer</button>
             </form>
         <?php } else {
-            $dirindex = fopen($path . "dirindex.php", "w");
-            if (!file_exists($path . "dirindex.php")) {
-                include $path . 'dirindex.php';
-                fwrite($dirindex, "<?php\n");
-                fwrite($dirindex, "\n");
-                fwrite($dirindex, "\$files = array(\n");
-                foreach ($files as $file => $thumbnail) {
-                    fwrite($dirindex, "    '" . $file . "' => '" . $thumbnail . "',\n");
-                }
-                fwrite($dirindex, "\n");
-            } else {
-                fwrite($dirindex, "<?php\n");
-                fwrite($dirindex, "\n");
-                fwrite($dirindex, "\$files = array(\n");
-            }
             for ($i = 0; $i < count($uploaded); $i++) {
                 if (file_exists($path . $uploaded_file[$i])) {
-                    $thumbnail = new Imagick($path . $uploaded_file[$i]);
-                    $thumbnail->thumbnailImage(0, 300);
-                    fwrite($dirindex, "    \"" . $uploaded_file[$i] . "\" => \"" . base64_encode($thumbnail->getImageBlob()) . "\",\n");
+                    echo "<div class='alert alert-primary' role='alert'>" . $uploaded[$i] . "</div>";
                 }
-                echo "<div class='alert alert-primary' role='alert'>" . $uploaded[$i] . "</div>";
             }
-            fwrite($dirindex, ");\n");
-            fwrite($dirindex, "?>");
-            fclose($dirindex);
+            include 'check-files.php';
+            check(str_replace(IMAGES_PATH, "", $path));
             echo "<a href='index.php?path=" . str_replace(IMAGES_PATH, "", $path) . "' class='btn btn-primary'>Retour</a>";
         } ?>
     </div>
