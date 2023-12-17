@@ -71,6 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <label for="formFile" class="form-label">Sélectionnez une image à uploader</label>
                     <input class="form-control" type="file" id="formFile" name="formFile[]" multiple>
                 </div>
+                <div class="mb-3"><span>Les images seront uploadées dans le dossier <?php if ($_GET['path'] == "") { echo "racine"; } else { echo $_GET['path']; } ?></span></div>
                 <button type="submit" class="btn btn-primary">Envoyer</button>
             </form>
         <?php } else {

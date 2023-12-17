@@ -39,26 +39,31 @@ if (isset($_GET['path'])) {
         </div>
     </nav>
     <div class="container">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <?php $cutted_path = explode("/", str_replace(IMAGES_PATH, "", $path));
-                if (count($cutted_path) > 1) {
-                    echo '<li class="breadcrumb-item"><a href="index.php?path=">Racine</a></li>';
-                    foreach ($cutted_path as $key => $value) {
-                        if ($value != "") {
-                            if ($key == array_key_last($cutted_path) - 1) {
-                                echo '<li class="breadcrumb-item active" aria-current="page">' . $value . '</li>';
-                            } else {
-                                echo '<li class="breadcrumb-item"><a href="index.php?path=' . urlencode(implode("/", array_slice($cutted_path, 0, $key + 1)) . "/") . '">' . $value . '</a></li>';
+        <div class="hstack">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">Vous êtes ici :&nbsp;
+                    <?php $cutted_path = explode("/", str_replace(IMAGES_PATH, "", $path));
+                    if (count($cutted_path) > 1) {
+                        echo '<li class="breadcrumb-item"><a href="index.php?path=">Racine</a></li>';
+                        foreach ($cutted_path as $key => $value) {
+                            if ($value != "") {
+                                if ($key == array_key_last($cutted_path) - 1) {
+                                    echo '<li class="breadcrumb-item active" aria-current="page">' . $value . '</li>';
+                                } else {
+                                    echo '<li class="breadcrumb-item"><a href="index.php?path=' . urlencode(implode("/", array_slice($cutted_path, 0, $key + 1)) . "/") . '">' . $value . '</a></li>';
+                                }
                             }
                         }
+                    } else {
+                        echo '<li class="breadcrumb-item active" aria-current="page">Racine</li>';
                     }
-                } else {
-                    echo '<li class="breadcrumb-item active" aria-current="page">Racine</li>';
-                }
-                ?>
-            </ol>
-        </nav>
+                    ?>
+                </ol>
+            </nav>
+            <div class="button-group ms-auto">
+                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#newFolder">Nouveau dossier</button>
+            </div>
+        </div>
         <div class="row row-cols-1 row-cols-md-3 g-4">
             <?php
             if (isset($_GET['page'])) {
@@ -67,7 +72,7 @@ if (isset($_GET['path'])) {
                 $current_page = 1;
             }
 
-            include $path."dirindex.php";
+            include $path . "dirindex.php";
             $all_subfolders = glob($path . "*", GLOB_ONLYDIR);
 
             foreach ($all_subfolders as $subfolder) {
@@ -77,7 +82,7 @@ if (isset($_GET['path'])) {
                 echo '<div class="card-body">';
                 echo '<h5 class="card-title">' . basename($subfolder) . '</h5>';
                 echo '<p class="card-text">Dossier</p>';
-                echo '<a href="index.php?path=' . urlencode($subfolder) . '" class="btn btn-primary">Ouvrir</a>';
+                echo '<a href="index.php?path=' . urlencode(basename($subfolder) . "/") . '" class="btn btn-primary">Ouvrir</a>';
                 if ($_SESSION['role'] != "users" && $_SESSION['role'] != "uploaders") {
                     echo '&nbsp;<a href="move.php?path=' . urlencode($subfolder) . '" class="btn btn-warning">Déplacer</a>';
                 }
@@ -89,19 +94,19 @@ if (isset($_GET['path'])) {
                 echo '</div>';
             }
             foreach ($files as $image => $thumbnail) {
-                $file_date = date("d/m/Y H:i", filemtime($path.$image));
+                $file_date = date("d/m/Y H:i", filemtime($path . $image));
                 echo '<div class="col">';
                 echo '<div class="card">';
-                echo '<a href="image.php?image=' . urlencode(str_replace(IMAGES_PATH, "", $path.$image)) . '"><img src="data:image/jpeg;base64,' . $thumbnail . '" class="card-img-top" alt="' . basename($image) . '"></a>';
+                echo '<a href="image.php?image=' . urlencode(str_replace(IMAGES_PATH, "", $path . $image)) . '"><img src="data:image/jpeg;base64,' . $thumbnail . '" class="card-img-top" alt="' . basename($image) . '"></a>';
                 echo '<div class="card-body">';
                 echo '<h5 class="card-title">' . basename($image) . '</h5>';
                 echo '<p class="card-text">Date : ' . $file_date . '</p>';
-                echo '<a href="image.php?image=' . urlencode(str_replace(IMAGES_PATH, "", $path.$image)) . '" class="btn btn-primary">Voir</a>';
+                echo '<a href="image.php?image=' . urlencode(str_replace(IMAGES_PATH, "", $path . $image)) . '" class="btn btn-primary">Voir</a>';
                 if ($_SESSION['role'] != "users" && $_SESSION['role'] != "uploaders") {
-                    echo '&nbsp;<a href="move.php?image=' . urlencode(str_replace(IMAGES_PATH, "", $path.$image)) . '" class="btn btn-warning">Déplacer</a>';
+                    echo '&nbsp;<a href="move.php?image=' . urlencode(str_replace(IMAGES_PATH, "", $path . $image)) . '" class="btn btn-warning">Déplacer</a>';
                 }
                 if ($_SESSION['role'] != "users" && $_SESSION['role'] != "uploaders") {
-                    echo '&nbsp;<a href="delete.php?image=' . urlencode(str_replace(IMAGES_PATH, "", $path.$image)) . '" class="btn btn-danger">Supprimer</a>';
+                    echo '&nbsp;<a href="delete.php?image=' . urlencode(str_replace(IMAGES_PATH, "", $path . $image)) . '" class="btn btn-danger">Supprimer</a>';
                 }
                 echo '</div>';
                 echo '</div>';
@@ -134,6 +139,40 @@ if (isset($_GET['path'])) {
                 ?>
             </ul>
         </nav>
-
+        <div class="modal fade" id="newFolder" tabindex="-1" aria-labelledby="newFolderModal" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="newFolderModal">Nouveau dossier</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="folderName" class="form-label">Nom du dossier</label>
+                            <input type="text" class="form-control" id="folderName" name="folderName">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                        <button type="button" class="btn btn-primary" onclick="createFolder();">Créer</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+    <script>
+        function createFolder() {
+            var folderName = document.getElementById("folderName").value;
+            var path = "<?php echo str_replace(IMAGES_PATH, "", $path); ?>";
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "create-folder.php", true);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    window.location.reload();
+                }
+            };
+            xhr.send("path=" + path + "&folder_name=" + folderName);
+        }
+    </script>
 </body>
