@@ -107,7 +107,7 @@ if (isset($_GET['path'])) {
                 echo '<h5 class="card-title">' . basename($image) . '</h5>';
                 echo '<p class="card-text">Date : ' . $file_date . '</p>';
                 echo '<a href="image.php?image=' . urlencode(str_replace(IMAGES_PATH, "", $path . $image)) . '" class="btn btn-primary">Voir</a>';
-                echo '&nbsp;<a href="'.  IMAGES_PATH . urldecode(basename($image)) . '" download="'.  basename(urldecode(basename($image))) . '" class="btn btn-success">Télécharger</a>';
+                echo '&nbsp;<a href="'.  $path . urldecode($image) . '" download="'.  basename(urldecode(basename($image))) . '" class="btn btn-success">Télécharger</a>';
                 if ($_SESSION['role'] != "users" && $_SESSION['role'] != "uploaders") {
                     echo '&nbsp;<a href="move.php?image=' . urlencode(str_replace(IMAGES_PATH, "", $path . $image)) . '" class="btn btn-warning">Déplacer</a>';
                 }

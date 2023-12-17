@@ -59,7 +59,7 @@ if (prev($files) !== false) {
         <?php if ($previous !== false) { ?>
             <a style="position: absolute; top: 50%; left: 0; padding: 10px; color: white; font-size: 50px; text-decoration: none;" href="?image=<?php echo urlencode(dirname($_GET['image']) . "/" . $previous); ?>"><</a>
                 <?php } ?>
-                <img src="<?php echo IMAGES_PATH . urldecode($_GET['image']); ?>" alt="<?php echo basename(urldecode($_GET['path'])); ?>" style="height: 94vh;">
+                <img src="<?php echo IMAGES_PATH . urldecode($_GET['image']); ?>" alt="<?php echo basename(urldecode($_GET['image'])); ?>" style="height: 94vh;">
                 <?php if ($next !== false) { ?>
                     <a style="position: absolute; top: 50%; right: 0; padding: 10px; color: white; font-size: 50px; text-decoration: none;" href="?image=<?php echo urlencode(dirname($_GET['image']) . "/" . $next); ?>">></a>
                 <?php } ?>
