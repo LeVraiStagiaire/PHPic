@@ -15,7 +15,7 @@ if ($_SESSION['role'] != 'administrators') {
 <html>
 
 <head>
-    <title>Admin</title>
+    <title>Admin - <?php echo SITE_TITLE; ?></title>
     <link rel="stylesheet" href="css/bootstrap.min.css">
     <script src="js/bootstrap.bundle.min.js"></script>
 </head>
@@ -47,7 +47,7 @@ if ($_SESSION['role'] != 'administrators') {
             </li>
         </ul>
         <?php if ($_GET['tab'] == 'general' || $_GET['tab'] == "") { ?>
-            <form action="apply-settings.php" method="post">
+            <form action="apply-settings.php" method="post" enctype="multipart/form-data">
                 <h3>Général</h3>
                 <div class="mb-3">
                     <label for="siteTitle" class="form-label">Titre du site</label>
@@ -56,6 +56,11 @@ if ($_SESSION['role'] != 'administrators') {
                 <div class="mb-3">
                     <label for="imagesPath" class="form-label">Chemin des images</label>
                     <input type="text" class="form-control" id="imagesPath" name="imagesPath" value="<?php echo IMAGES_PATH; ?>">
+                </div>
+                <div class="mb-3">
+                    <label for="imagesPerPage" class="form-label">Logo du site</label><br>
+                    <img src="/img/logo.png" alt="Logo" width="60" height="60" class="align-text-top">
+                    <input type="file" class="form-control" id="logo" name="logo">
                 </div>
                 <input type="submit" class="btn btn-primary" value="Enregistrer">
             </form>

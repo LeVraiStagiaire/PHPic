@@ -37,7 +37,7 @@ if (prev($files) !== false) {
 
 <head>
     <meta charset="UTF-8">
-    <title>Accueil</title>
+    <title><?php echo basename($_GET['image']); ?> - <?php echo SITE_TITLE; ?></title>
     <link rel="stylesheet" href="css/bootstrap.min.css">
     <script src="js/bootstrap.bundle.min.js"></script>
 </head>

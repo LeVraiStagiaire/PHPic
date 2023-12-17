@@ -25,7 +25,7 @@ if (isset($_GET['path'])) {
 
 <head>
     <meta charset="UTF-8">
-    <title>Upload</title>
+    <title>Déplacer - <?php echo SITE_TITLE; ?></title>
     <link rel="stylesheet" href="css/bootstrap.min.css">
     <script src="js/bootstrap.bundle.min.js"></script>
 </head>

@@ -21,7 +21,7 @@ if (isset($_GET['path'])) {
 
 <head>
     <meta charset="UTF-8">
-    <title>Accueil</title>
+    <title><?php if (str_replace(IMAGES_PATH, "", $path) == "") { echo "/"; } else { echo str_replace(IMAGES_PATH, "", $path); } ?> - <?php echo SITE_TITLE; ?></title>
     <link rel="stylesheet" href="css/bootstrap.min.css">
     <script src="js/bootstrap.bundle.min.js"></script>
 </head>

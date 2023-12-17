@@ -21,5 +21,8 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     fwrite($configFile, "\n");
     fwrite($configFile, "?>");
     fclose($configFile);
+    if (isset($_FILES['logo']) && $_FILES['logo']['error'] == 0) {
+        move_uploaded_file($_FILES['logo']['tmp_name'], "img/logo.png");
+    }
     header('location: admin.php');
 }
