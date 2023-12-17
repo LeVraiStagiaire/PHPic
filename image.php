@@ -8,6 +8,28 @@ if (!isset($_SESSION['username'])) {
     header('location:login.php');
 }
 
+//get next and previous image
+include IMAGES_PATH . urldecode(dirname($_GET['image'])) . "/dirindex.php";
+$next = false;
+$previous = false;
+while (key($files) !== basename(urldecode($_GET['image']))) {
+    next($files);
+}
+
+if (next($files) !== false) {
+    $next = key($files);
+}
+
+reset($files);
+
+while (key($files) !== basename(urldecode($_GET['image']))) {
+    next($files);
+}
+
+if (prev($files) !== false) {
+    $previous = key($files);
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -34,12 +56,18 @@ if (!isset($_SESSION['username'])) {
         </div>
     </nav>
     <div style="text-align: center;">
-        <img src="<?php echo IMAGES_PATH . urldecode($_GET['image']); ?>" alt="<?php echo basename(urldecode($_GET['path'])); ?>" style="height: 94vh;">
+        <?php if ($previous !== false) { ?>
+            <a style="position: absolute; top: 50%; left: 0; padding: 10px; color: white; font-size: 50px; text-decoration: none;" href="?image=<?php echo urlencode(dirname($_GET['image']) . "/" . $previous); ?>"><</a>
+                <?php } ?>
+                <img src="<?php echo IMAGES_PATH . urldecode($_GET['image']); ?>" alt="<?php echo basename(urldecode($_GET['path'])); ?>" style="height: 94vh;">
+                <?php if ($next !== false) { ?>
+                    <a style="position: absolute; top: 50%; right: 0; padding: 10px; color: white; font-size: 50px; text-decoration: none;" href="?image=<?php echo urlencode(dirname($_GET['image']) . "/" . $next); ?>">></a>
+                <?php } ?>
     </div>
     <div style="position: absolute; bottom: 0; right: 0;">
         <div class="btn-group" role="group" aria-label="Basic example">
             <a href="<?php echo IMAGES_PATH . urldecode($_GET['image']); ?>" download="<?php echo basename(urldecode($_GET['path'])); ?>" class="btn btn-secondary">Télécharger</a>
-            <button type="button" class="btn btn-secondary" onclick="window.history.back();">Retour</button>
+            <a type="button" class="btn btn-secondary" href="index.php?path=<?php echo urlencode(dirname($_GET['image']) . "/"); ?>">Retour</a>
         </div>
 </body>
 
