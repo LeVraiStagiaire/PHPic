@@ -107,6 +107,7 @@ if (isset($_GET['path'])) {
                 echo '<h5 class="card-title">' . basename($image) . '</h5>';
                 echo '<p class="card-text">Date : ' . $file_date . '</p>';
                 echo '<a href="image.php?image=' . urlencode(str_replace(IMAGES_PATH, "", $path . $image)) . '" class="btn btn-primary">Voir</a>';
+                echo '&nbsp;<a href="'.  IMAGES_PATH . urldecode(basename($image)) . '" download="'.  basename(urldecode(basename($image))) . '" class="btn btn-success">Télécharger</a>';
                 if ($_SESSION['role'] != "users" && $_SESSION['role'] != "uploaders") {
                     echo '&nbsp;<a href="move.php?image=' . urlencode(str_replace(IMAGES_PATH, "", $path . $image)) . '" class="btn btn-warning">Déplacer</a>';
                 }
@@ -143,7 +144,7 @@ if (isset($_GET['path'])) {
                         echo '<li class="page-item"><a class="page-link" href="index.php?path=' . urlencode(str_replace(IMAGES_PATH, "", $path)) . '&page=' . $i . '">' . $i . '</a></li>';
                     }
                 }
-                if ($current_page < $pages) {
+                if ($current_page < $pages + 1) {
                     echo '<li class="page-item"><a class="page-link" href="index.php?path=' . urlencode(str_replace(IMAGES_PATH, "", $path)) . '&page=' . ($current_page + 1) . '">Suivant</a></li>';
                 } else {
                     echo '<li class="page-item disabled"><a class="page-link" href="#" tabindex="-1" aria-disabled="true">Suivant</a></li>';

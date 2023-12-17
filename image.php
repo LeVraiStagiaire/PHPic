@@ -38,6 +38,7 @@ if (!isset($_SESSION['username'])) {
     </div>
     <div style="position: absolute; bottom: 0; right: 0;">
         <div class="btn-group" role="group" aria-label="Basic example">
+            <a href="<?php echo IMAGES_PATH . urldecode($_GET['image']); ?>" download="<?php echo basename(urldecode($_GET['path'])); ?>" class="btn btn-secondary">Télécharger</a>
             <button type="button" class="btn btn-secondary" onclick="window.history.back();">Retour</button>
         </div>
 </body>
