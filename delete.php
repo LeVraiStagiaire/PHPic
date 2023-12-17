@@ -10,9 +10,20 @@ if (!isset($_SESSION['username'])) {
 
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
     if (isset($_POST['image'])) {
-        $path = IMAGES_PATH . urldecode($_GET['image']);
+        $path = IMAGES_PATH . urldecode($_POST['image']);
         if (file_exists($path)) {
             unlink($path);
+            $path = dirname($path) . "/";
+            include $path . "dirindex.php";
+            //Rewrite dirindex.php
+            $dirindex = fopen($path . "dirindex.php", "w");
+            fwrite($dirindex, "<?php\n\n\$files = array(\n");
+            foreach ($files as $file => $value) {
+                if ($file != basename(urldecode($_POST['image']))) {
+                    fwrite($dirindex, "\t\"" . $file . "\" => \"" . $value . "\",\n");
+                }
+            }
+            fwrite($dirindex, ");\n\n?>");
             header('location:index.php?path=' . urlencode(str_replace(IMAGES_PATH, "", $path)));
         } else {
             echo "Le fichier n'existe pas.";

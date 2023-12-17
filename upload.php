@@ -26,12 +26,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     $uploaded = array();
+    $uploaded_file = array();
 
     foreach ($_FILES['formFile']['name'] as $position => $file) {
         if (move_uploaded_file($_FILES['formFile']['tmp_name'][$position], $uploadpath . $_FILES['formFile']['name'][$position])) {
             $uploaded[] = $_FILES['formFile']['name'][$position] . " envoyé avec succès !\n";
+            $uploaded_file[] = $_FILES["formFile"]["name"][$position];
         } else {
-            $uploaded[] = "Echec de l'envoi de " . $_FILES['formFile']['name'][$position] . "\n";
+            $uploaded[] = "Echec de l'envoi de " . $_FILES['formFile']['name'][$position] . ".\n";
+            $uploaded_file[] = $_FILES["formFile"]["name"][$position];
         }
     }
 }
@@ -52,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <nav class="navbar navbar-expand-lg bg-body-tertiary">
         <div class="container-fluid">
             <img src="img/logo.png" alt="Logo" width="30" height="30" class="d-inline-block align-text-top">
-            <a class="navbar-brand" href="index.php">Photos</a>
+            <a class="navbar-brand" href="index.php"><?php echo SITE_TITLE; ?></a>
             <div class="navbar-nav">
                 <a class="nav-link" href="index.php">Accueil</a>
                 <?php if ($_SESSION['role'] != "users") { ?><a class="nav-link active" aria-current="page" href="upload.php">Upload</a><?php } ?>
@@ -71,9 +74,32 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <button type="submit" class="btn btn-primary">Envoyer</button>
             </form>
         <?php } else {
-            foreach ($uploaded as $item) {
-                echo "<div class='alert alert-primary' role='alert'>" . $item . "</div>";
+            $dirindex = fopen($path . "dirindex.php", "w");
+            if (!file_exists($path . "dirindex.php")) {
+                include $path . 'dirindex.php';
+                fwrite($dirindex, "<?php\n");
+                fwrite($dirindex, "\n");
+                fwrite($dirindex, "\$files = array(\n");
+                foreach ($files as $file => $thumbnail) {
+                    fwrite($dirindex, "    '" . $file . "' => '" . $thumbnail . "',\n");
+                }
+                fwrite($dirindex, "\n");
+            } else {
+                fwrite($dirindex, "<?php\n");
+                fwrite($dirindex, "\n");
+                fwrite($dirindex, "\$files = array(\n");
             }
+            for ($i = 0; $i < count($uploaded); $i++) {
+                if (file_exists($path . $uploaded_file[$i])) {
+                    $thumbnail = new Imagick($path . $uploaded_file[$i]);
+                    $thumbnail->thumbnailImage(0, 300);
+                    fwrite($dirindex, "    \"" . $uploaded_file[$i] . "\" => \"" . base64_encode($thumbnail->getImageBlob()) . "\",\n");
+                }
+                echo "<div class='alert alert-primary' role='alert'>" . $uploaded[$i] . "</div>";
+            }
+            fwrite($dirindex, ");\n");
+            fwrite($dirindex, "?>");
+            fclose($dirindex);
             echo "<a href='index.php?path=" . str_replace(IMAGES_PATH, "", $path) . "' class='btn btn-primary'>Retour</a>";
         } ?>
     </div>

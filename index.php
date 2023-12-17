@@ -30,7 +30,7 @@ if (isset($_GET['path'])) {
     <nav class="navbar navbar-expand-lg bg-body-tertiary">
         <div class="container-fluid">
             <img src="img/logo.png" alt="Logo" width="30" height="30" class="d-inline-block align-text-top">
-            <a class="navbar-brand" href="index.php">Photos</a>
+            <a class="navbar-brand" href="index.php"><?php echo SITE_TITLE; ?></a>
             <div class="navbar-nav">
                 <a class="nav-link active" aria-current="page" href="index.php">Accueil</a>
                 <?php if ($_SESSION['role'] != "users") { ?><a class="nav-link" href="upload.php?path=<?php echo str_replace(IMAGES_PATH, "", $path); ?>">Upload</a><?php } ?>
@@ -67,16 +67,10 @@ if (isset($_GET['path'])) {
                 $current_page = 1;
             }
 
-            $all_images = glob($path . "*.{jpg,png,gif}", GLOB_BRACE);
-            usort($all_images, function ($a, $b) {
-                return filemtime($b) - filemtime($a);
-            });
+            include $path."dirindex.php";
             $all_subfolders = glob($path . "*", GLOB_ONLYDIR);
 
-            $subfolders = array_slice($all_subfolders, ($current_page - 1) * 9, 9);
-            $images = array_slice($all_images, ($current_page - 1) * 9, 9 - count($subfolders));
-
-            foreach ($subfolders as $subfolder) {
+            foreach ($all_subfolders as $subfolder) {
                 echo '<div class="col">';
                 echo '<div class="card">';
                 echo '<a href="index.php?path=' . urlencode(str_replace(IMAGES_PATH, "", $subfolder) . "/") . '"><img src="img/folder.png" class="card-img-top" alt="' . basename($subfolder) . '"></a>';
@@ -94,23 +88,20 @@ if (isset($_GET['path'])) {
                 echo '</div>';
                 echo '</div>';
             }
-            foreach ($images as $image) {
-                $imagick = new Imagick($image);
-                $imagick->thumbnailImage(0, 300);
-                $image64 = base64_encode($imagick->getImageBlob());
-                $file_date = date("d/m/Y H:i", filemtime($image));
+            foreach ($files as $image => $thumbnail) {
+                $file_date = date("d/m/Y H:i", filemtime($path.$image));
                 echo '<div class="col">';
                 echo '<div class="card">';
-                echo '<a href="image.php?image=' . urlencode(str_replace(IMAGES_PATH, "", $image)) . '"><img src="data:image/jpeg;base64,' . $image64 . '" class="card-img-top" alt="' . basename($image) . '"></a>';
+                echo '<a href="image.php?image=' . urlencode(str_replace(IMAGES_PATH, "", $path.$image)) . '"><img src="data:image/jpeg;base64,' . $thumbnail . '" class="card-img-top" alt="' . basename($image) . '"></a>';
                 echo '<div class="card-body">';
                 echo '<h5 class="card-title">' . basename($image) . '</h5>';
                 echo '<p class="card-text">Date : ' . $file_date . '</p>';
-                echo '<a href="image.php?image=' . urlencode(str_replace(IMAGES_PATH, "", $image)) . '" class="btn btn-primary">Voir</a>';
+                echo '<a href="image.php?image=' . urlencode(str_replace(IMAGES_PATH, "", $path.$image)) . '" class="btn btn-primary">Voir</a>';
                 if ($_SESSION['role'] != "users" && $_SESSION['role'] != "uploaders") {
-                    echo '&nbsp;<a href="move.php?image=' . urlencode(str_replace(IMAGES_PATH, "", $image)) . '" class="btn btn-warning">Déplacer</a>';
+                    echo '&nbsp;<a href="move.php?image=' . urlencode(str_replace(IMAGES_PATH, "", $path.$image)) . '" class="btn btn-warning">Déplacer</a>';
                 }
                 if ($_SESSION['role'] != "users" && $_SESSION['role'] != "uploaders") {
-                    echo '&nbsp;<a href="delete.php?image=' . urlencode(str_replace(IMAGES_PATH, "", $image)) . '" class="btn btn-danger">Supprimer</a>';
+                    echo '&nbsp;<a href="delete.php?image=' . urlencode(str_replace(IMAGES_PATH, "", $path.$image)) . '" class="btn btn-danger">Supprimer</a>';
                 }
                 echo '</div>';
                 echo '</div>';
@@ -122,7 +113,7 @@ if (isset($_GET['path'])) {
         <nav aria-label="Défilement des pages">
             <ul class="pagination justify-content-center">
                 <?php
-                $pages = ceil((count($all_images) + count($all_subfolders)) / 9) - 1;
+                $pages = ceil((count($files) + count($all_subfolders)) / 9) - 1;
                 if ($current_page > 1) {
                     echo '<li class="page-item"><a class="page-link" href="index.php?path=' . urlencode(str_replace(IMAGES_PATH, "", $path)) . '&page=' . ($current_page - 1) . '">Précédent</a></li>';
                 } else {

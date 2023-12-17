@@ -34,7 +34,7 @@ if (isset($_GET['path'])) {
     <nav class="navbar navbar-expand-lg bg-body-tertiary">
         <div class="container-fluid">
             <img src="img/logo.png" alt="Logo" width="30" height="30" class="d-inline-block align-text-top">
-            <a class="navbar-brand" href="index.php">Photos</a>
+            <a class="navbar-brand" href="index.php"><?php echo SITE_TITLE; ?></a>
             <div class="navbar-nav">
                 <a class="nav-link" href="index.php">Accueil</a>
                 <?php if ($_SESSION['role'] != "users") { ?><a class="nav-link active" aria-current="page" href="upload.php">Upload</a><?php } ?>
