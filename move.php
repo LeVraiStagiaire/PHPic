@@ -38,6 +38,7 @@ if (isset($_GET['path'])) {
             <div class="navbar-nav">
                 <a class="nav-link" href="index.php">Accueil</a>
                 <?php if ($_SESSION['role'] != "users") { ?><a class="nav-link active" aria-current="page" href="upload.php">Upload</a><?php } ?>
+                <?php if ($_SESSION['role'] == "administrators") { ?><a class="nav-link" href="admin.php">Admin</a><?php } ?>
                 <a class="nav-link" href="logout.php">Déconnexion</a>
             </div>
         </div>

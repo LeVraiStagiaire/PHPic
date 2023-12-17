@@ -34,6 +34,7 @@ if (isset($_GET['path'])) {
             <div class="navbar-nav">
                 <a class="nav-link active" aria-current="page" href="index.php">Accueil</a>
                 <?php if ($_SESSION['role'] != "users") { ?><a class="nav-link" href="upload.php?path=<?php echo str_replace(IMAGES_PATH, "", $path); ?>">Upload</a><?php } ?>
+                <?php if ($_SESSION['role'] == "administrators") { ?><a class="nav-link" href="admin.php">Admin</a><?php } ?>
                 <a class="nav-link" href="logout.php">Déconnexion</a>
             </div>
         </div>
@@ -61,7 +62,7 @@ if (isset($_GET['path'])) {
                 </ol>
             </nav>
             <div class="button-group ms-auto">
-                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#newFolder">Nouveau dossier</button>
+                <?php if ($_SESSION['role'] != "users" && $_SESSION['role'] != "uploaders") { ?><button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#newFolder">Nouveau dossier</button><?php } ?>
             </div>
         </div>
         <div class="row row-cols-1 row-cols-md-3 g-4">
@@ -74,6 +75,10 @@ if (isset($_GET['path'])) {
 
             include $path . "dirindex.php";
             $all_subfolders = glob($path . "*", GLOB_ONLYDIR);
+
+            // Show only 9 items from folder and files per page
+            $all_subfolders = array_slice($all_subfolders, ($current_page - 1) * 9, 9);
+            $showing_files = array_slice($files, ($current_page - 1) * 9, 9 - count($all_subfolders));
 
             foreach ($all_subfolders as $subfolder) {
                 echo '<div class="col">';
@@ -93,7 +98,7 @@ if (isset($_GET['path'])) {
                 echo '</div>';
                 echo '</div>';
             }
-            foreach ($files as $image => $thumbnail) {
+            foreach ($showing_files as $image => $thumbnail) {
                 $file_date = date("d/m/Y H:i", filemtime($path . $image));
                 echo '<div class="col">';
                 echo '<div class="card">';
@@ -113,8 +118,15 @@ if (isset($_GET['path'])) {
                 echo '</div>';
             }
 
+            if (count($files) + count($all_subfolders) == 0) {
+                echo '<div class="col"></div><p class="col fs-2 text-center">Aucun fichier ou dossier à afficher.</p>';
+            }
+
             ?>
         </div><br />
+        <div class="text-center">
+            <span>Affichage de <?php echo ($current_page - 1) * 9 + 1; ?> à <?php echo ($current_page - 1) * 9 + count($all_subfolders) + count($showing_files); ?> sur <?php echo count($files) + count($all_subfolders); ?> éléments.</span>
+        </div>
         <nav aria-label="Défilement des pages">
             <ul class="pagination justify-content-center">
                 <?php
@@ -124,7 +136,7 @@ if (isset($_GET['path'])) {
                 } else {
                     echo '<li class="page-item disabled"><a class="page-link" href="#" tabindex="-1" aria-disabled="true">Précédent</a></li>';
                 }
-                for ($i = 1; $i <= $pages; $i++) {
+                for ($i = 1; $i <= $pages + 1; $i++) {
                     if ($i == $current_page) {
                         echo '<li class="page-item active" aria-current="page"><span class="page-link">' . $i . '</span></li>';
                     } else {

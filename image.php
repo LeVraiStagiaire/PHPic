@@ -28,16 +28,18 @@ if (!isset($_SESSION['username'])) {
             <div class="navbar-nav">
                 <a class="nav-link" href="index.php">Accueil</a>
                 <?php if ($_SESSION['role'] != "users") { ?><a class="nav-link" href="upload.php">Upload</a><?php } ?>
+                <?php if ($_SESSION['role'] == "administrators") { ?><a class="nav-link" href="admin.php">Admin</a><?php } ?>
                 <a class="nav-link" href="logout.php">Déconnexion</a>
             </div>
         </div>
     </nav>
     <div style="text-align: center;">
-        <img src="<?php echo IMAGES_PATH.urldecode($_GET['image']); ?>" alt="<?php echo basename(urldecode($_GET['path'])); ?>" style="height: 94vh;">
+        <img src="<?php echo IMAGES_PATH . urldecode($_GET['image']); ?>" alt="<?php echo basename(urldecode($_GET['path'])); ?>" style="height: 94vh;">
     </div>
     <div style="position: absolute; bottom: 0; right: 0;">
         <div class="btn-group" role="group" aria-label="Basic example">
             <button type="button" class="btn btn-secondary" onclick="window.history.back();">Retour</button>
-    </div>
+        </div>
 </body>
+
 </html>

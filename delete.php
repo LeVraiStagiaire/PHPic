@@ -53,6 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
             <div class="navbar-nav">
                 <a class="nav-link active" aria-current="page" href="index.php">Accueil</a>
                 <?php if ($_SESSION['role'] != "users") { ?><a class="nav-link" href="upload.php?path=<?php echo str_replace(IMAGES_PATH, "", $path); ?>">Upload</a><?php } ?>
+                <?php if ($_SESSION['role'] == "administrators") { ?><a class="nav-link" href="admin.php">Admin</a><?php } ?>
                 <a class="nav-link" href="logout.php">Déconnexion</a>
             </div>
         </div>

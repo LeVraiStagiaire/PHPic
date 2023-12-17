@@ -26,8 +26,9 @@ if ($_SESSION['role'] != 'administrators') {
             <img src="img/logo.png" alt="Logo" width="30" height="30" class="d-inline-block align-text-top">
             <a class="navbar-brand" href="index.php"><?php echo SITE_TITLE; ?></a>
             <div class="navbar-nav">
-                <a class="nav-link active" aria-current="page" href="index.php">Accueil</a>
+                <a class="nav-link" href="index.php">Accueil</a>
                 <?php if ($_SESSION['role'] != "users") { ?><a class="nav-link" href="upload.php?path=<?php echo str_replace(IMAGES_PATH, "", $path); ?>">Upload</a><?php } ?>
+                <?php if ($_SESSION['role'] == "administrators") { ?><a class="nav-link active" aria-current="page" href="admin.php">Admin</a><?php } ?>
                 <a class="nav-link" href="logout.php">Déconnexion</a>
             </div>
         </div>
