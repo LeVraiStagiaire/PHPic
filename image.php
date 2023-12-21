@@ -43,7 +43,7 @@ if (prev($files) !== false) {
 </head>
 
 <body style="background-color: black;">
-    <nav class="navbar navbar-expand-lg bg-body-tertiary" data-bs-theme="dark">
+    <nav class="navbar fixed-top navbar-expand-lg bg-body-tertiary" data-bs-theme="dark">
         <div class="container-fluid">
             <img src="img/logo.png" alt="Logo" width="30" height="30" class="d-inline-block align-text-top">
             <a class="navbar-brand" href="index.php"><?php echo SITE_TITLE; ?></a>
@@ -57,18 +57,32 @@ if (prev($files) !== false) {
     </nav>
     <div style="text-align: center;">
         <?php if ($previous !== false) { ?>
-            <a style="position: absolute; top: 50%; left: 0; padding: 10px; color: white; font-size: 50px; text-decoration: none;" href="?image=<?php echo urlencode(dirname($_GET['image']) . "/" . $previous); ?>"><</a>
+            <a style="position: fixed; top: 50%; left: 0; padding: 10px; color: white; font-size: 50px; text-decoration: none;" href="?image=<?php echo urlencode(dirname($_GET['image']) . "/" . $previous); ?>"><</a>
                 <?php } ?>
-                <img src="<?php echo IMAGES_PATH . urldecode($_GET['image']); ?>" alt="<?php echo basename(urldecode($_GET['image'])); ?>" style="height: 94vh;">
+                <img src="<?php echo IMAGES_PATH . urldecode($_GET['image']); ?>" alt="<?php echo basename(urldecode($_GET['image'])); ?>" style=" margin-top: 55px; height: 94vh; cursor: zoom-in" id="image">
                 <?php if ($next !== false) { ?>
-                    <a style="position: absolute; top: 50%; right: 0; padding: 10px; color: white; font-size: 50px; text-decoration: none;" href="?image=<?php echo urlencode(dirname($_GET['image']) . "/" . $next); ?>">></a>
+                    <a style="position: fixed; top: 50%; right: 0; padding: 10px; color: white; font-size: 50px; text-decoration: none;" href="?image=<?php echo urlencode(dirname($_GET['image']) . "/" . $next); ?>">></a>
                 <?php } ?>
     </div>
-    <div style="position: absolute; bottom: 0; right: 0;">
+    <div style="position: fixed; bottom: 0; right: 0;">
         <div class="btn-group" role="group" aria-label="Basic example">
             <a href="<?php echo IMAGES_PATH . urldecode($_GET['image']); ?>" download="<?php echo basename(urldecode($_GET['path'])); ?>" class="btn btn-secondary">Télécharger</a>
             <a type="button" class="btn btn-secondary" href="index.php?path=<?php echo urlencode(dirname($_GET['image']) . "/"); ?>">Retour</a>
         </div>
+    </div>
+
+    <script>
+        var image = document.getElementById("image");
+        image.addEventListener("click", function() {
+            if (image.style.height == "94vh") {
+                image.style.height = "auto";
+                image.style.cursor = "zoom-out";
+            } else {
+                image.style.height = "94vh";
+                image.style.cursor = "zoom-in";
+            }
+        });
+    </script>
 </body>
 
 </html>

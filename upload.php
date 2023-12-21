@@ -69,6 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <form enctype="multipart/form-data" method="POST" action="<?php $_SERVER['PHP_SELF']; ?>">
                 <div class="mb-3">
                     <input type="hidden" name="path" value="<?php echo str_replace(IMAGES_PATH, "", $path); ?>">
+                    <input type="hidden" name="<?php echo ini_get("session.upload_progress.name"); ?>" value="123">
                     <label for="formFile" class="form-label">Sélectionnez une image à uploader</label>
                     <input class="form-control" type="file" id="formFile" name="formFile[]" multiple>
                 </div>
