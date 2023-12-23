@@ -23,7 +23,7 @@ if ($_SESSION['role'] != 'administrators') {
 <body>
     <nav class="navbar navbar-expand-lg bg-body-tertiary">
         <div class="container-fluid">
-            <img src="img/logo.png" alt="Logo" width="30" height="30" class="d-inline-block align-text-top">
+            <a href="index.php"><img src="img/logo.png" alt="Logo" width="30" height="30" class="d-inline-block align-text-top"></a>
             <a class="navbar-brand" href="index.php"><?php echo SITE_TITLE; ?></a>
             <div class="navbar-nav">
                 <a class="nav-link" href="index.php">Accueil</a>
@@ -44,6 +44,11 @@ if ($_SESSION['role'] != 'administrators') {
                 <a class="nav-link <?php if ($_GET['tab'] == "users") {
                                         echo 'active" aria-current="page';
                                     } ?>" href="?tab=users">Utilisateurs</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link <?php if ($_GET['tab'] == "ldap") {
+                                        echo 'active" aria-current="page';
+                                    } ?>" href="?tab=ldap">LDAP</a>
             </li>
         </ul>
         <?php if ($_GET['tab'] == 'general' || $_GET['tab'] == "") { ?>
@@ -112,6 +117,59 @@ if ($_SESSION['role'] != 'administrators') {
                     ?>
                 </tbody>
             </table>
+        <?php } else if ($_GET['tab'] == "ldap") { ?>
+            <form action="apply-ldap.php" method="post">
+                <h3>LDAP</h3>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="" id="ldapEnabled">
+                    <label class="form-check-label" for="ldapEnabled">
+                        Activé
+                    </label>
+                </div>
+                <div class="mb-3">
+                    <label for="ldapHost" class="form-label">Serveur LDAP</label>
+                    <input type="text" class="form-control" id="ldapHost" name="ldapHost" value="<?php echo LDAP_HOST; ?>">
+                </div>
+                <div class="mb-3">
+                    <label for="ldapPort" class="form-label">Port</label>
+                    <input type="text" class="form-control" id="ldapPort" name="ldapPort" value="<?php echo LDAP_PORT; ?>">
+                </div>
+                <div class="mb-3">
+                    <label for="ldapDN" class="form-label">DN de base</label>
+                    <input type="text" class="form-control" id="ldapDN" name="ldapDN" value="<?php echo LDAP_BASE_DN; ?>">
+                </div>
+                <div class="mb-3">
+                    <label for="ldapBindUser" class="form-label">Utilisateur de référence</label>
+                    <input type="text" class="form-control" id="ldapBindUser" name="ldapBindUser" value="<?php echo LDAP_BIND_DN; ?>">
+                </div>
+                <div class="mb-3">
+                    <label for="ldapBindPassword" class="form-label">Mot de passe de l'utilisateur de référence</label>
+                    <input type="password" class="form-control" id="ldapBindPassword" name="ldapBindPassword" value="<?php echo LDAP_BIND_PASSWORD; ?>">
+                </div>
+                <div class="mb-3">
+                    <label for="ldapUserDN" class="form-label">DN des utilisateurs</label>
+                    <input type="text" class="form-control" id="ldapUserDN" name="ldapUserDN" value="<?php echo LDAP_USER_DN; ?>">
+                </div>
+                <input type="submit" class="btn btn-primary" value="Enregistrer">
+            </form>
+            <script>
+                document.getElementById("ldapEnabled").onchange = function() {
+                    document.getElementById("ldapHost").disabled = !this.checked;
+                    document.getElementById("ldapPort").disabled = !this.checked;
+                    document.getElementById("ldapDN").disabled = !this.checked;
+                    document.getElementById("ldapBindUser").disabled = !this.checked;
+                    document.getElementById("ldapBindPassword").disabled = !this.checked;
+                    document.getElementById("ldapUserDN").disabled = !this.checked;
+                }
+                document.body.onload = function() {
+                    document.getElementById("ldapHost").disabled = !this.checked;
+                    document.getElementById("ldapPort").disabled = !this.checked;
+                    document.getElementById("ldapDN").disabled = !this.checked;
+                    document.getElementById("ldapBindUser").disabled = !this.checked;
+                    document.getElementById("ldapBindPassword").disabled = !this.checked;
+                    document.getElementById("ldapUserDN").disabled = !this.checked;
+                }
+            </script>
         <?php } ?>
     </div>
 </body>

@@ -45,7 +45,7 @@ if (prev($files) !== false) {
 <body style="background-color: black;">
     <nav class="navbar fixed-top navbar-expand-lg bg-body-tertiary" data-bs-theme="dark">
         <div class="container-fluid">
-            <img src="img/logo.png" alt="Logo" width="30" height="30" class="d-inline-block align-text-top">
+            <a href="index.php"><img src="img/logo.png" alt="Logo" width="30" height="30" class="d-inline-block align-text-top"></a>
             <a class="navbar-brand" href="index.php"><?php echo SITE_TITLE; ?></a>
             <div class="navbar-nav">
                 <a class="nav-link" href="index.php">Accueil</a>
