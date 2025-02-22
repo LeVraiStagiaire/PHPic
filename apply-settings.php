@@ -7,6 +7,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     fwrite($configFile, "<?php\n");
     fwrite($configFile, "\n");
     fwrite($configFile, "define('SITE_TITLE', \"" . $_POST['siteTitle'] . "\");\n");
+    fwrite($configFile, "define('PUBLIC_SITE', " . (isset($_POST['publicSite']) ? "true" : "false") . ");\n");
     fwrite($configFile, "define('IMAGES_PATH', '" . $_POST['imagesPath'] . "');\n");
     fwrite($configFile, "define('LDAP_HOST', '" . LDAP_HOST . "');\n");
     fwrite($configFile, "define('LDAP_PORT', '" . LDAP_PORT . "');\n");

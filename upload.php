@@ -4,41 +4,6 @@ include 'config/config.php';
 
 session_start();
 
-if (!isset($_SESSION['username'])) {
-    header('location:login.php');
-}
-
-if ($_SESSION['role'] == "users") {
-    header('location:index.php');
-}
-
-if (isset($_GET['path'])) {
-    $path = IMAGES_PATH . urldecode($_GET['path']);
-} else {
-    $path = IMAGES_PATH;
-}
-
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    if (isset($_POST['path'])) {
-        $uploadpath = IMAGES_PATH . $_POST['path'];
-    } else {
-        $uploadpath = IMAGES_PATH;
-    }
-
-    $uploaded = array();
-    $uploaded_file = array();
-
-    foreach ($_FILES['formFile']['name'] as $position => $file) {
-        if (move_uploaded_file($_FILES['formFile']['tmp_name'][$position], $uploadpath . $_FILES['formFile']['name'][$position])) {
-            $uploaded[] = $_FILES['formFile']['name'][$position] . " envoyé avec succès !\n";
-            $uploaded_file[] = $_FILES["formFile"]["name"][$position];
-        } else {
-            $uploaded[] = "Echec de l'envoi de " . $_FILES['formFile']['name'][$position] . ".\n";
-            $uploaded_file[] = $_FILES["formFile"]["name"][$position];
-        }
-    }
-}
-
 ?>
 
 <!DOCTYPE html>
@@ -65,32 +30,89 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </div>
     </nav>
     <div class="container">
-        <?php if ($_SERVER['REQUEST_METHOD'] == 'GET') { ?>
-            <form enctype="multipart/form-data" method="POST" action="<?php $_SERVER['PHP_SELF']; ?>">
-                <div class="mb-3">
-                    <input type="hidden" name="path" value="<?php echo str_replace(IMAGES_PATH, "", $path); ?>">
-                    <input type="hidden" name="<?php echo ini_get("session.upload_progress.name"); ?>" value="123">
-                    <label for="formFile" class="form-label">Sélectionnez une image à uploader</label>
-                    <input class="form-control" type="file" id="formFile" name="formFile[]" multiple>
-                </div>
-                <div class="mb-3"><span>Les images seront uploadées dans le dossier <?php if ($_GET['path'] == "") {
-                                                                                        echo "racine";
-                                                                                    } else {
-                                                                                        echo $_GET['path'];
-                                                                                    } ?></span></div>
-                <button type="submit" class="btn btn-primary">Envoyer</button>
-            </form>
-        <?php } else {
-            for ($i = 0; $i < count($uploaded); $i++) {
-                if (file_exists($path . $uploaded_file[$i])) {
-                    echo "<div class='alert alert-primary' role='alert'>" . $uploaded[$i] . "</div>";
-                }
-            }
-            include 'check-files.php';
-            check(str_replace(IMAGES_PATH, "", $path));
-            echo "<a href='index.php?path=" . str_replace(IMAGES_PATH, "", $path) . "' class='btn btn-primary'>Retour</a>";
-        } ?>
+        <form enctype="multipart/form-data" method="POST" action="<?php $_SERVER['PHP_SELF']; ?>">
+            <div class="mb-3">
+                <input type="hidden" name="path" value="<?php echo str_replace(IMAGES_PATH, "", $_GET['path']); ?>">
+                <input type="hidden" name="<?php echo ini_get("session.upload_progress.name"); ?>" value="123">
+                <label for="formFile" class="form-label">Sélectionnez une image à uploader</label>
+                <input class="form-control" type="file" id="formFile" name="formFile[]" multiple>
+            </div>
+            <div class="mb-3"><span>Les images seront uploadées dans le dossier <?php if ($_GET['path'] == "") {
+                                                                                    echo "racine";
+                                                                                } else {
+                                                                                    echo $_GET['path'];
+                                                                                } ?></span></div>
+            <button type="submit" class="btn btn-primary">Envoyer</button>
+
+            <div id="progressBarsContainer"></div>
+        </form>
     </div>
+
+    <script>
+        document.querySelector('form').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const form = e.target;
+            const files = form.querySelector('input[type="file"]').files;
+
+            if (files.length === 0) {
+                alert('Veuillez sélectionner un fichier');
+                return;
+            }
+
+            // Vider les anciennes barres de progression
+            const progressContainer = document.getElementById('progressBarsContainer');
+            progressContainer.innerHTML = '';
+
+            Array.from(files).forEach((file, index) => {
+                // Créer une barre de progression pour chaque fichier
+                const progressDiv = document.createElement('div');
+                progressDiv.classList.add('progress-container');
+                progressDiv.innerHTML = `
+                            <div class="alert alert-primary" role="alert">
+                                ${file.name}
+                                <div class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
+                                    <div class="progress-bar" id="progress-${index}" style="width: 0%">0%</div>
+                                </div>
+                            </div>
+                        `;
+                progressContainer.appendChild(progressDiv);
+
+                // Envoyer chaque fichier individuellement
+                const formData = new FormData();
+                formData.append('formFile', file);
+
+                const xhr = new XMLHttpRequest();
+                xhr.upload.addEventListener('progress', function(event) {
+                    if (event.lengthComputable) {
+                        const percentComplete = Math.round((event.loaded / event.total) * 100);
+                        const progressBar = document.getElementById(`progress-${index}`);
+                        progressBar.style.width = percentComplete + '%';
+                        progressBar.textContent = percentComplete + '%';
+                    }
+                });
+
+                xhr.addEventListener('load', function() {
+                    const progressBar = document.getElementById(`progress-${index}`);
+                    progressBar.textContent = 'Terminé';
+                    progressBar.style.background = '#4caf50'; // Vert pour succès
+                });
+
+                xhr.addEventListener('error', function() {
+                    const progressBar = document.getElementById(`progress-${index}`);
+                    progressBar.textContent = 'Erreur';
+                    progressBar.style.background = '#f44336'; // Rouge pour erreur
+                });
+
+                formData.append('path', form.querySelector('input[name="path"]').value);
+                xhr.open('POST', 'handle-upload.php', true);
+                xhr.send(formData);
+            });
+            fetch('check-files.php?path=<?php echo str_replace(IMAGES_PATH, "", $_GET['path']); ?>', {
+                method: 'GET'
+            });
+        });
+    </script>
 </body>
 
 </html>

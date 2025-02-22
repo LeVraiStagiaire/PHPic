@@ -59,7 +59,7 @@ if (prev($files) !== false) {
         <?php if ($previous !== false) { ?>
             <a style="position: fixed; top: 50%; left: 0; padding: 10px; color: white; font-size: 50px; text-decoration: none;" href="?image=<?php echo urlencode(dirname($_GET['image']) . "/" . $previous); ?>"><</a>
                 <?php } ?>
-                <img src="<?php echo IMAGES_PATH . urldecode($_GET['image']); ?>" alt="<?php echo basename(urldecode($_GET['image'])); ?>" style=" margin-top: 55px; height: 94vh; cursor: zoom-in" id="image">
+                <video src="<?php echo IMAGES_PATH . urldecode($_GET['image']); ?>" alt="<?php echo basename(urldecode($_GET['image'])); ?>" style=" margin-top: 55px; height: 94vh; cursor: zoom-in" id="image">
                 <?php if ($next !== false) { ?>
                     <a style="position: fixed; top: 50%; right: 0; padding: 10px; color: white; font-size: 50px; text-decoration: none;" href="?image=<?php echo urlencode(dirname($_GET['image']) . "/" . $next); ?>">></a>
                 <?php } ?>
@@ -70,19 +70,6 @@ if (prev($files) !== false) {
             <a type="button" class="btn btn-secondary" href="index.php?path=<?php echo urlencode(dirname($_GET['image']) . "/"); ?>">Retour</a>
         </div>
     </div>
-
-    <script>
-        var image = document.getElementById("image");
-        image.addEventListener("click", function() {
-            if (image.style.height == "94vh") {
-                image.style.height = "auto";
-                image.style.cursor = "zoom-out";
-            } else {
-                image.style.height = "94vh";
-                image.style.cursor = "zoom-in";
-            }
-        });
-    </script>
 </body>
 
 </html>

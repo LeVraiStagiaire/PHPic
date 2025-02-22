@@ -36,17 +36,17 @@ if ($_SESSION['role'] != 'administrators') {
     <div class="container">
         <ul class="nav nav-pills">
             <li class="nav-item">
-                <a class="nav-link <?php if ($_GET['tab'] == "general" || $_GET['tab'] == "") {
+                <a class="nav-link <?php if (isset($_GET['tab']) && $_GET['tab'] == "general" || !isset($_GET['tab'])) {
                                         echo 'active" aria-current="page';
                                     } ?>" href="?tab=general">Général</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link <?php if ($_GET['tab'] == "users") {
+                <a class="nav-link <?php if (isset($_GET['tab']) && $_GET['tab'] == "users") {
                                         echo 'active" aria-current="page';
                                     } ?>" href="?tab=users">Utilisateurs</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link <?php if ($_GET['tab'] == "ldap") {
+                <a class="nav-link <?php if (isset($_GET['tab']) && $_GET['tab'] == "ldap") {
                                         echo 'active" aria-current="page';
                                     } ?>" href="?tab=ldap">LDAP</a>
             </li>
@@ -57,6 +57,17 @@ if ($_SESSION['role'] != 'administrators') {
                 <div class="mb-3">
                     <label for="siteTitle" class="form-label">Titre du site</label>
                     <input type="text" class="form-control" id="siteTitle" name="siteTitle" value="<?php echo SITE_TITLE; ?>">
+                </div>
+                <div class="mb-3">
+                    <label for="publicSite" class="form-label">Site public</label>
+                    <select class="form-select" id="publicSite" name="publicSite">
+                        <option value="true" <?php if (PUBLIC_SITE) {
+                                                    echo 'selected';
+                                                } ?>>Oui</option>
+                        <option value="false" <?php if (!PUBLIC_SITE) {
+                                                    echo 'selected';
+                                                } ?>>Non</option>
+                    </select>
                 </div>
                 <div class="mb-3">
                     <label for="imagesPath" class="form-label">Chemin des images</label>

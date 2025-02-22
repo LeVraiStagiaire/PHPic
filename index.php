@@ -4,7 +4,7 @@ include 'config/config.php';
 
 session_start();
 
-if (!isset($_SESSION['username'])) {
+if (!isset($_SESSION['username']) && !PUBLIC_SITE) {
     header('location:login.php');
 }
 
@@ -33,9 +33,8 @@ if (isset($_GET['path'])) {
             <a class="navbar-brand" href="index.php"><?php echo SITE_TITLE; ?></a>
             <div class="navbar-nav">
                 <a class="nav-link active" aria-current="page" href="index.php">Accueil</a>
-                <?php if ($_SESSION['role'] != "users") { ?><a class="nav-link" href="upload.php?path=<?php echo str_replace(IMAGES_PATH, "", $path); ?>">Upload</a><?php } ?>
-                <?php if ($_SESSION['role'] == "administrators") { ?><a class="nav-link" href="admin.php">Admin</a><?php } ?>
-                <a class="nav-link" href="logout.php">Déconnexion</a>
+                <?php if (isset($_SESSION['role']) && $_SESSION['role'] == "administrators") { ?><a class="nav-link" href="admin.php">Admin</a><?php } ?>
+                <?php if (isset($_SESSION['role'])) { ?><a class="nav-link" href="logout.php">Déconnexion</a><?php } else { ?><a class="nav-link" href="login.php">Se connecter</a><?php } ?>
             </div>
         </div>
     </nav>
@@ -62,7 +61,9 @@ if (isset($_GET['path'])) {
                 </ol>
             </nav>
             <div class="button-group ms-auto">
-                <?php if ($_SESSION['role'] != "users" && $_SESSION['role'] != "uploaders") { ?><button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#newFolder">Nouveau dossier</button><?php } ?>
+                <?php if (isset($_SESSION['role']) && $_SESSION['role'] != "users" && $_SESSION['role'] != "uploaders") { ?><button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#newFolder">Nouveau dossier</button><?php } ?>
+                <?php if (isset($_SESSION['role']) && $_SESSION['role'] != "users") { ?><a href="upload.php?path=<?php echo str_replace(IMAGES_PATH, "", $path); ?>" class="btn btn-primary">Upload</a><?php } ?>
+                <button type="button" class="btn btn-secondary" onclick="window.open('/download-all.php?path=<?php echo $path; ?>', '_BLANK');">Télécharger tout</button>
             </div>
         </div>
         <div class="row row-cols-1 row-cols-md-3 g-4">
@@ -75,6 +76,9 @@ if (isset($_GET['path'])) {
 
             include $path . "dirindex.php";
             $all_subfolders = glob($path . "*", GLOB_ONLYDIR);
+            $all_subfolders = array_filter($all_subfolders, function ($folder) {
+                return basename($folder) != "@eaDir";
+            });
 
             // Show only 9 items from folder and files per page
             $all_subfolders = array_slice($all_subfolders, ($current_page - 1) * 9, 9);
@@ -88,10 +92,10 @@ if (isset($_GET['path'])) {
                 echo '<h5 class="card-title">' . basename($subfolder) . '</h5>';
                 echo '<p class="card-text">Dossier</p>';
                 echo '<a href="index.php?path=' . urlencode(basename($subfolder) . "/") . '" class="btn btn-primary">Ouvrir</a>';
-                if ($_SESSION['role'] != "users" && $_SESSION['role'] != "uploaders") {
+                if (isset($_SESSION['role']) && $_SESSION['role'] != "users" && $_SESSION['role'] != "uploaders") {
                     echo '&nbsp;<a href="move.php?path=' . urlencode($subfolder) . '" class="btn btn-warning">Déplacer</a>';
                 }
-                if ($_SESSION['role'] != "users" && $_SESSION['role'] != "uploaders") {
+                if (isset($_SESSION['role']) && $_SESSION['role'] != "users" && $_SESSION['role'] != "uploaders") {
                     echo '&nbsp;<a href="delete.php?path=' . urlencode($subfolder) . '" class="btn btn-danger">Supprimer</a>';
                 }
                 echo '</div>';
@@ -108,10 +112,10 @@ if (isset($_GET['path'])) {
                 echo '<p class="card-text">Date : ' . $file_date . '</p>';
                 echo '<a href="image.php?image=' . urlencode(str_replace(IMAGES_PATH, "", $path . $image)) . '" class="btn btn-primary">Voir</a>';
                 echo '&nbsp;<a href="'.  $path . urldecode($image) . '" download="'.  basename(urldecode(basename($image))) . '" class="btn btn-success">Télécharger</a>';
-                if ($_SESSION['role'] != "users" && $_SESSION['role'] != "uploaders") {
+                if (isset($_SESSION['role']) && $_SESSION['role'] != "users" && $_SESSION['role'] != "uploaders") {
                     echo '&nbsp;<a href="move.php?image=' . urlencode(str_replace(IMAGES_PATH, "", $path . $image)) . '" class="btn btn-warning">Déplacer</a>';
                 }
-                if ($_SESSION['role'] != "users" && $_SESSION['role'] != "uploaders") {
+                if (isset($_SESSION['role']) && $_SESSION['role'] != "users" && $_SESSION['role'] != "uploaders") {
                     echo '&nbsp;<a href="delete.php?image=' . urlencode(str_replace(IMAGES_PATH, "", $path . $image)) . '" class="btn btn-danger">Supprimer</a>';
                 }
                 echo '</div>';
