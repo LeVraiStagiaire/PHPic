@@ -74,10 +74,12 @@ if (isset($_GET['path'])) {
                 $current_page = 1;
             }
 
-            include $path . "dirindex.php";
+            $files = glob($path . "*.{jpg,JPG,jpeg,JPEG,png,PNG,gif,GIF}", GLOB_BRACE);
+            $files = array_filter($files, 'is_file');
+
             $all_subfolders = glob($path . "*", GLOB_ONLYDIR);
             $all_subfolders = array_filter($all_subfolders, function ($folder) {
-                return basename($folder) != "@eaDir";
+                return basename($folder) != "@eaDir" && basename($folder) != "thumb";
             });
 
             // Show only 9 items from folder and files per page
@@ -102,21 +104,29 @@ if (isset($_GET['path'])) {
                 echo '</div>';
                 echo '</div>';
             }
-            foreach ($showing_files as $image => $thumbnail) {
-                $file_date = date("d/m/Y H:i", filemtime($path . $image));
+            foreach ($showing_files as $image) {
+                $file_date = date("d/m/Y H:i", filemtime($image));
                 echo '<div class="col">';
                 echo '<div class="card">';
-                echo '<a href="image.php?image=' . urlencode(str_replace(IMAGES_PATH, "", $path . $image)) . '"><img src="data:image/jpeg;base64,' . $thumbnail . '" class="card-img-top" alt="' . basename($image) . '"></a>';
+                if (mime_content_type($image) == "video/mp4") {
+                    echo '<a href="video.php?video=' . urlencode(str_replace(IMAGES_PATH, "", $image)) . '"><img src="img/video.png" class="card-img-top" alt="' . basename($image) . '"></a>';
+                } else {
+                echo '<a href="image.php?image=' . urlencode(str_replace(IMAGES_PATH, "", $image)) . '"><img src="' . $path . 'thumb/' . basename($image) . '" class="card-img-top" alt="' . basename($image) . '"></a>';
+                }
                 echo '<div class="card-body">';
                 echo '<h5 class="card-title">' . basename($image) . '</h5>';
                 echo '<p class="card-text">Date : ' . $file_date . '</p>';
-                echo '<a href="image.php?image=' . urlencode(str_replace(IMAGES_PATH, "", $path . $image)) . '" class="btn btn-primary">Voir</a>';
-                echo '&nbsp;<a href="'.  $path . urldecode($image) . '" download="'.  basename(urldecode(basename($image))) . '" class="btn btn-success">Télécharger</a>';
+                if (mime_content_type($image) == "video/mp4") {
+                    echo '<a href="video.php?video=' . urlencode(str_replace(IMAGES_PATH, "", $image)) . '" class="btn btn-primary">Voir</a>';
+                } else {
+                    echo '<a href="image.php?image=' . urlencode(str_replace(IMAGES_PATH, "", $image)) . '" class="btn btn-primary">Voir</a>';
+                }
+                echo '&nbsp;<a href="'. urldecode($image) . '" download="'.  basename(urldecode(basename($image))) . '" class="btn btn-success">Télécharger</a>';
                 if (isset($_SESSION['role']) && $_SESSION['role'] != "users" && $_SESSION['role'] != "uploaders") {
-                    echo '&nbsp;<a href="move.php?image=' . urlencode(str_replace(IMAGES_PATH, "", $path . $image)) . '" class="btn btn-warning">Déplacer</a>';
+                    echo '&nbsp;<a href="move.php?image=' . urlencode(str_replace(IMAGES_PATH, "", $image)) . '" class="btn btn-warning">Déplacer</a>';
                 }
                 if (isset($_SESSION['role']) && $_SESSION['role'] != "users" && $_SESSION['role'] != "uploaders") {
-                    echo '&nbsp;<a href="delete.php?image=' . urlencode(str_replace(IMAGES_PATH, "", $path . $image)) . '" class="btn btn-danger">Supprimer</a>';
+                    echo '&nbsp;<a href="delete.php?image=' . urlencode(str_replace(IMAGES_PATH, "", $image)) . '" class="btn btn-danger">Supprimer</a>';
                 }
                 echo '</div>';
                 echo '</div>';

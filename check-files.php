@@ -13,15 +13,17 @@ function check($path)
     $dirindex = fopen(IMAGES_PATH . $path . "dirindex.php", "w");
     fwrite($dirindex, "<?php\n\n\$files = array(\n");
     foreach ($files as $file) {
-        if ($file != "." && $file != ".." && $file != "dirindex.php") {
+        if (str_contains(mime_content_type($file), "image")) {
             try {
                 $thumbnail = new Imagick($file);
                 $thumbnail->thumbnailImage(0, 300);
                 fwrite($dirindex, "\t\"" . basename($file) . "\" => \"" . base64_encode($thumbnail->getImageBlob()) . "\",\n");
             } catch (Exception $e) {
-                echo "Erreur : ". $e->getMessage() ."\n";
+                echo "Erreur : " . $e->getMessage() . "\n";
                 continue;
             }
+        } else if (str_contains(mime_content_type($file), "video")) {
+            fwrite($dirindex, "\t\"" . basename($file) . "\" => \"video\",\n");
         }
     }
     fwrite($dirindex, ");\n\n?>");

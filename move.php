@@ -73,6 +73,9 @@ if (isset($_GET['path'])) {
         <div class="list-group">
             <?php
             $dirs = glob($path . '*', GLOB_ONLYDIR);
+            $dirs = array_filter($dirs, function ($dir) {
+                return !str_contains($dir, 'thumb');
+            });
             foreach ($dirs as $dir) {
                 echo '<a href="move.php?path=' . urlencode(str_replace(IMAGES_PATH, "", $dir) . "/") . '&image=' . $_GET['image'] . '" class="list-group-item list-group-item-action"><img src="img/folder.png" height="24" />&nbsp;' . basename($dir) . '</a>';
             }

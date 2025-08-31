@@ -51,7 +51,7 @@ if ($_SESSION['role'] != 'administrators') {
                                     } ?>" href="?tab=ldap">LDAP</a>
             </li>
         </ul>
-        <?php if ($_GET['tab'] == 'general' || $_GET['tab'] == "") { ?>
+        <?php if (isset($_GET['tab']) && ($_GET['tab'] == 'general' || $_GET['tab'] == "")) { ?>
             <form action="apply-settings.php" method="post" enctype="multipart/form-data">
                 <h3>Général</h3>
                 <div class="mb-3">
@@ -128,7 +128,7 @@ if ($_SESSION['role'] != 'administrators') {
                     ?>
                 </tbody>
             </table>
-        <?php } else if ($_GET['tab'] == "ldap") { ?>
+        <?php } else if (isset($_GET['tab']) && $_GET['tab'] == "ldap") { ?>
             <form action="apply-ldap.php" method="post">
                 <h3>LDAP</h3>
                 <div class="form-check">

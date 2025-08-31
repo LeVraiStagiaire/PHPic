@@ -13,11 +13,26 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         $path = IMAGES_PATH . urldecode($_POST['image']);
         if (file_exists($path)) {
             unlink($path);
+            if (file_exists(IMAGES_PATH . dirname($_POST['image']) . "/thumb/" . basename($_POST['image']))) {
+                unlink(IMAGES_PATH . dirname($_POST['image']) . "/thumb/" . basename($_POST['image']));
+            }
+        }
+    } else if (isset($_POST['path'])) {
+        $path = IMAGES_PATH . urldecode($_POST['path']);
+        if (is_dir($path)) {
+            $files = array_diff(scandir($path), array('.', '..'));
+            foreach ($files as $file) {
+                if (is_file($path . '/' . $file)) {
+                    unlink($path . '/' . $file);
+                    if (file_exists($path . '/thumb/' . $file)) {
+                        unlink($path . '/thumb/' . $file);
+                    }
+                }
+            }
+            rmdir($path);
         }
     }
     $path = dirname($_POST['image']) . "/";
-    include 'check-files.php';
-    check($path);
     header('location:index.php?path=' . urlencode(str_replace(IMAGES_PATH, "", $path)));
 }
 
@@ -47,10 +62,10 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         </div>
     </nav>
     <div class="container">
-        <h1>Suprimer <?php echo basename(urldecode($_GET['image'])); ?></h1>
+        <h1>Suprimer <?php echo basename(urldecode(isset($_GET['image']) ? $_GET['image'] : $_GET['path'])); ?></h1>
         <p>Êtes-vous sûr(e) de vouloir supprimer cette photo ?</p>
         <form action="delete.php" method="post">
-            <input type="hidden" name="image" value="<?php echo $_GET['image']; ?>">
+            <input type="hidden" name="image" value="<?php echo isset($_GET['image']) ? $_GET['image'] : $_GET['path']; ?>">
             <button type="submit" class="btn btn-danger">Supprimer</button>
             <a href="index.php" class="btn btn-secondary">Annuler</a>
         </form>

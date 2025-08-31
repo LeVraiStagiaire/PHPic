@@ -43,6 +43,8 @@ session_start();
                                                                                     echo $_GET['path'];
                                                                                 } ?></span></div>
             <button type="submit" class="btn btn-primary">Envoyer</button>
+            <div id="uploadStatus"></div>
+            <button type="button" style="display: none;" class="btn btn-secondary" id="back">Retour</button>
 
             <div id="progressBarsContainer"></div>
         </form>
@@ -51,6 +53,9 @@ session_start();
     <script>
         document.querySelector('form').addEventListener('submit', function(e) {
             e.preventDefault();
+            document.querySelector('button[type="submit"]').disabled = true;
+            document.querySelector('button[type="submit"]').textContent = 'Upload en cours...';
+            document.querySelector('button[type="button"]').classList.add('disabled');
 
             const form = e.target;
             const files = form.querySelector('input[type="file"]').files;
@@ -64,52 +69,93 @@ session_start();
             const progressContainer = document.getElementById('progressBarsContainer');
             progressContainer.innerHTML = '';
 
+            var remain = files.length;
+
             Array.from(files).forEach((file, index) => {
                 // Créer une barre de progression pour chaque fichier
                 const progressDiv = document.createElement('div');
                 progressDiv.classList.add('progress-container');
                 progressDiv.innerHTML = `
-                            <div class="alert alert-primary" role="alert">
-                                ${file.name}
-                                <div class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
-                                    <div class="progress-bar" id="progress-${index}" style="width: 0%">0%</div>
-                                </div>
+                        <div class="alert alert-primary" role="alert">
+                            ${file.name}
+                            <div class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
+                                <div class="progress-bar" id="progress-${index}" style="width: 0%">0%</div>
                             </div>
-                        `;
+                        </div>
+                    `;
                 progressContainer.appendChild(progressDiv);
-
-                // Envoyer chaque fichier individuellement
-                const formData = new FormData();
-                formData.append('formFile', file);
-
-                const xhr = new XMLHttpRequest();
-                xhr.upload.addEventListener('progress', function(event) {
-                    if (event.lengthComputable) {
-                        const percentComplete = Math.round((event.loaded / event.total) * 100);
-                        const progressBar = document.getElementById(`progress-${index}`);
-                        progressBar.style.width = percentComplete + '%';
-                        progressBar.textContent = percentComplete + '%';
-                    }
-                });
-
-                xhr.addEventListener('load', function() {
-                    const progressBar = document.getElementById(`progress-${index}`);
-                    progressBar.textContent = 'Terminé';
-                    progressBar.style.background = '#4caf50'; // Vert pour succès
-                });
-
-                xhr.addEventListener('error', function() {
-                    const progressBar = document.getElementById(`progress-${index}`);
-                    progressBar.textContent = 'Erreur';
-                    progressBar.style.background = '#f44336'; // Rouge pour erreur
-                });
-
-                formData.append('path', form.querySelector('input[name="path"]').value);
-                xhr.open('POST', 'handle-upload.php', true);
-                xhr.send(formData);
             });
-            fetch('check-files.php?path=<?php echo str_replace(IMAGES_PATH, "", $_GET['path']); ?>', {
-                method: 'GET'
+
+            // Fonction pour uploader les fichiers 5 par 5
+            function uploadBatch(files, startIndex = 0) {
+                const batchSize = 5;
+                const batch = Array.from(files).slice(startIndex, startIndex + batchSize);
+
+                let completedInBatch = 0;
+
+                batch.forEach((file, index) => {
+                    const globalIndex = startIndex + index;
+                    document.getElementById('uploadStatus').textContent = `Téléchargement en cours... (${files.length - remain}/${files.length})`;
+
+                    // Envoyer chaque fichier individuellement
+                    const formData = new FormData();
+                    formData.append('formFile', file);
+
+                    const xhr = new XMLHttpRequest();
+                    xhr.upload.addEventListener('progress', function(event) {
+                        if (event.lengthComputable) {
+                            const percentComplete = Math.round((event.loaded / event.total) * 100);
+                            const progressBar = document.getElementById(`progress-${globalIndex}`);
+                            progressBar.style.width = percentComplete + '%';
+                            progressBar.textContent = percentComplete + '%';
+                        }
+                    });
+
+                    xhr.addEventListener('load', function() {
+                        const progressBar = document.getElementById(`progress-${globalIndex}`);
+                        progressBar.textContent = 'Terminé';
+                        progressBar.style.background = '#4caf50'; // Vert pour succès
+                        remain--;
+                        completedInBatch++;
+                        document.getElementById('uploadStatus').textContent = `Téléchargement en cours... (${files.length - remain}/${files.length})`;
+                        fetch('gen-thumb.php?image=<?php echo str_replace(IMAGES_PATH, "", $_GET['path']); ?>' + file.name, {
+                            method: 'GET'
+                        });
+                        if (remain === 0) {
+                            document.getElementById('back').style.display = 'block';
+                        }
+                        // Quand tous les fichiers du batch sont terminés, lancer le batch suivant
+                        if (completedInBatch === batch.length) {
+                            if (startIndex + batchSize < files.length) {
+                                uploadBatch(files, startIndex + batchSize);
+                            }
+                        }
+                    });
+
+                    xhr.addEventListener('error', function() {
+                        const progressBar = document.getElementById(`progress-${globalIndex}`);
+                        progressBar.textContent = 'Erreur';
+                        progressBar.style.background = '#f44336'; // Rouge pour erreur
+                        completedInBatch++;
+                        // Même logique pour continuer en cas d'erreur
+                        if (completedInBatch === batch.length) {
+                            if (startIndex + batchSize < files.length) {
+                                uploadBatch(files, startIndex + batchSize);
+                            }
+                        }
+                    });
+
+                    formData.append('path', form.querySelector('input[name="path"]').value);
+                    xhr.open('POST', 'handle-upload.php', true);
+                    xhr.send(formData);
+                });
+            }
+
+            uploadBatch(files);
+
+
+            document.getElementById('back').addEventListener('click', function() {
+                window.history.back();
             });
         });
     </script>

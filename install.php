@@ -5,6 +5,7 @@ if (file_exists("config.php")) {
 } else {
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         mkdir("public/images", 0777, true);
+        mkdir("public/tmp", 0777, true);
         mkdir("config");
 
         $configFile = fopen("config/config.php", "w");
@@ -58,7 +59,7 @@ if (file_exists("config.php")) {
         <div class="card" style="width: 25rem; text-align: start; box-shadow: 5px 5px 5px grey;">
             <div class="card-body">
                 <form action="install.php" method="post">
-                    <h4>COnfiguration du site</h4>
+                    <h4>Configuration du site</h4>
                     <div class="mb-3">
                         <label for="siteTitleField" class="form-label">Titre du site</label>
                         <input type="text" class="form-control" name="siteTitle" id="siteTitleField" placeholder="Titre du site" required />
