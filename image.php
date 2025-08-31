@@ -9,25 +9,34 @@ if (!isset($_SESSION['username']) && PUBLIC_SITE == false) {
 }
 
 //get next and previous image
-include IMAGES_PATH . urldecode(dirname($_GET['image'])) . "/dirindex.php";
-$next = false;
+// Récupérer le dossier de l'image courante
+$currentImage = urldecode($_GET['image']);
+$dir = dirname($currentImage);
+
+// Lister les fichiers images du dossier
+$directory = rtrim(IMAGES_PATH . $dir, "/") . "/";
+$allFiles = scandir($directory);
+
+// Filtrer pour ne garder que les fichiers images (jpg, png, gif, etc.)
+$imageFiles = array_values(array_filter($allFiles, function($file) use ($directory) {
+    $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+    return is_file($directory . $file) && in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp']);
+}));
+
+// Trouver la position de l'image courante
+$currentBase = basename($currentImage);
+$index = array_search($currentBase, $imageFiles);
+
 $previous = false;
-while (key($files) !== basename(urldecode($_GET['image']))) {
-    next($files);
-}
+$next = false;
 
-if (next($files) !== false) {
-    $next = key($files);
-}
-
-reset($files);
-
-while (key($files) !== basename(urldecode($_GET['image']))) {
-    next($files);
-}
-
-if (prev($files) !== false) {
-    $previous = key($files);
+if ($index !== false) {
+    if ($index > 0) {
+        $previous = $imageFiles[$index - 1];
+    }
+    if ($index < count($imageFiles) - 1) {
+        $next = $imageFiles[$index + 1];
+    }
 }
 
 ?>

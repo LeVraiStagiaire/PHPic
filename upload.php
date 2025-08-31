@@ -55,7 +55,7 @@ session_start();
             e.preventDefault();
             document.querySelector('button[type="submit"]').disabled = true;
             document.querySelector('button[type="submit"]').textContent = 'Upload en cours...';
-            document.querySelector('button[type="button"]').classList.add('disabled');
+            document.querySelector('button[type="submit"]').classList.add('disabled');
 
             const form = e.target;
             const files = form.querySelector('input[type="file"]').files;
@@ -86,70 +86,84 @@ session_start();
                 progressContainer.appendChild(progressDiv);
             });
 
-            // Fonction pour uploader les fichiers 5 par 5
-            function uploadBatch(files, startIndex = 0) {
-                const batchSize = 5;
-                const batch = Array.from(files).slice(startIndex, startIndex + batchSize);
+            // Fonction pour uploader les fichiers avec un nombre maximum de uploads simultanés
+            function uploadFilesWithConcurrency(files, maxConcurrent = 5) {
+                let currentIndex = 0;
+                let activeUploads = 0;
+                let completed = 0;
 
-                let completedInBatch = 0;
+                function uploadNext() {
+                    if (currentIndex >= files.length) return;
+                    if (activeUploads >= maxConcurrent) return;
 
-                batch.forEach((file, index) => {
-                    const globalIndex = startIndex + index;
-                    document.getElementById('uploadStatus').textContent = `Téléchargement en cours... (${files.length - remain}/${files.length})`;
+                    const file = files[currentIndex];
+                    const fileIndex = currentIndex;
+                    currentIndex++;
+                    activeUploads++;
 
-                    // Envoyer chaque fichier individuellement
+                    document.getElementById('uploadStatus').textContent = `Téléchargement en cours... (${completed}/${files.length})`;
+
                     const formData = new FormData();
                     formData.append('formFile', file);
+                    formData.append('path', document.querySelector('input[name="path"]').value);
 
                     const xhr = new XMLHttpRequest();
                     xhr.upload.addEventListener('progress', function(event) {
                         if (event.lengthComputable) {
                             const percentComplete = Math.round((event.loaded / event.total) * 100);
-                            const progressBar = document.getElementById(`progress-${globalIndex}`);
+                            const progressBar = document.getElementById(`progress-${fileIndex}`);
                             progressBar.style.width = percentComplete + '%';
                             progressBar.textContent = percentComplete + '%';
                         }
                     });
 
                     xhr.addEventListener('load', function() {
-                        const progressBar = document.getElementById(`progress-${globalIndex}`);
+                        const progressBar = document.getElementById(`progress-${fileIndex}`);
                         progressBar.textContent = 'Terminé';
-                        progressBar.style.background = '#4caf50'; // Vert pour succès
-                        remain--;
-                        completedInBatch++;
-                        document.getElementById('uploadStatus').textContent = `Téléchargement en cours... (${files.length - remain}/${files.length})`;
+                        progressBar.style.background = '#4caf50';
+                        completed++;
+                        activeUploads--;
+                        document.getElementById('uploadStatus').textContent = `Téléchargement en cours... (${completed}/${files.length})`;
                         fetch('gen-thumb.php?image=<?php echo str_replace(IMAGES_PATH, "", $_GET['path']); ?>' + file.name, {
                             method: 'GET'
                         });
-                        if (remain === 0) {
+                        if (completed === files.length) {
                             document.getElementById('back').style.display = 'block';
-                        }
-                        // Quand tous les fichiers du batch sont terminés, lancer le batch suivant
-                        if (completedInBatch === batch.length) {
-                            if (startIndex + batchSize < files.length) {
-                                uploadBatch(files, startIndex + batchSize);
-                            }
+                        } else {
+                            uploadNext();
                         }
                     });
 
                     xhr.addEventListener('error', function() {
-                        const progressBar = document.getElementById(`progress-${globalIndex}`);
+                        const progressBar = document.getElementById(`progress-${fileIndex}`);
                         progressBar.textContent = 'Erreur';
-                        progressBar.style.background = '#f44336'; // Rouge pour erreur
-                        completedInBatch++;
-                        // Même logique pour continuer en cas d'erreur
-                        if (completedInBatch === batch.length) {
-                            if (startIndex + batchSize < files.length) {
-                                uploadBatch(files, startIndex + batchSize);
-                            }
+                        progressBar.style.background = '#f44336';
+                        completed++;
+                        activeUploads--;
+                        if (completed === files.length) {
+                            document.getElementById('back').style.display = 'block';
+                        } else {
+                            uploadNext();
                         }
                     });
 
-                    formData.append('path', form.querySelector('input[name="path"]').value);
                     xhr.open('POST', 'handle-upload.php', true);
                     xhr.send(formData);
-                });
+
+                    // Lancer d'autres uploads si possible
+                    if (activeUploads < maxConcurrent) {
+                        uploadNext();
+                    }
+                }
+
+                // Démarrer les premiers uploads
+                for (let i = 0; i < maxConcurrent && i < files.length; i++) {
+                    uploadNext();
+                }
             }
+
+            // Remplacer l'appel à uploadBatch par la nouvelle fonction
+            uploadFilesWithConcurrency(files, 5);
 
             uploadBatch(files);
 

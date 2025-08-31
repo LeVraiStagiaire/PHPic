@@ -105,7 +105,14 @@ if (isset($_GET['path'])) {
                 echo '</div>';
             }
             foreach ($showing_files as $image) {
+                // Try to get the real photo date from EXIF, fallback to filemtime
                 $file_date = date("d/m/Y H:i", filemtime($image));
+                if (function_exists('exif_read_data')) {
+                    $exif = @exif_read_data($image);
+                    if ($exif && isset($exif['DateTimeOriginal'])) {
+                        $file_date = date("d/m/Y H:i", strtotime($exif['DateTimeOriginal']));
+                    }
+                }
                 echo '<div class="col">';
                 echo '<div class="card">';
                 if (mime_content_type($image) == "video/mp4") {
